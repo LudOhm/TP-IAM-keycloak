@@ -1,70 +1,244 @@
-# Getting Started with Create React App
+# 🔐 TP IAM – Implémentation d’un SSO avec Keycloak et React
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Classe :** M1 CSM
+**Date :** 28/04/2026
+**Environnement :** MacOS
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 📌 Objectif du TP
 
-### `npm start`
+L’objectif de ce TP est de mettre en place une solution d’**Identity and Access Management (IAM)** en utilisant **Keycloak** afin de :
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+* Déployer un serveur IAM via Docker
+* Configurer un client et un utilisateur
+* Mettre en place une authentification avec **OAuth2 / OpenID Connect**
+* Récupérer un **JWT (JSON Web Token)**
+* Développer une application **React** avec :
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+  * une page de login
+  * une page privée protégée
+  * affichage du contenu du token
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🏗️ Architecture du projet
 
-### `npm run build`
+```text
+[ React App ]
+      |
+      | (requête login)
+      v
+[ Keycloak Server ]
+      |
+      | (JWT)
+      v
+[ React stocke le token ]
+      |
+      | (accès page privée)
+      v
+[ Affichage du payload ]
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## ⚙️ Technologies utilisées
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+* React (JavaScript)
+* Keycloak
+* Docker
+* OAuth2 / OpenID Connect
+* JWT (JSON Web Token)
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🚀 Déploiement de Keycloak
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Le serveur Keycloak est lancé avec Docker :
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+docker run -p 8080:8080 \
+-e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+-e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+quay.io/keycloak/keycloak:26.0.1 start-dev
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Accès :
+👉 http://localhost:8080
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🔧 Configuration Keycloak
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 1. Création d’un Realm
 
-### Code Splitting
+* Nom : `tp-iam`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 2. Création d’un Client
 
-### Analyzing the Bundle Size
+* Client ID : `react-app`
+* Access Type : **public**
+* Direct Access Grants Enabled : **ON**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 3. Création d’un utilisateur
 
-### Making a Progressive Web App
+* Username : `test`
+* Password : `test`
+* Temporary : **OFF**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+---
 
-### Advanced Configuration
+## 🔑 Récupération du token (JWT)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Requête utilisée :
 
-### Deployment
+```bash
+curl -X POST "http://localhost:8080/realms/tp-iam/protocol/openid-connect/token" \
+-H "Content-Type: application/x-www-form-urlencoded" \
+-d "client_id=react-app" \
+-d "username=test" \
+-d "password=test" \
+-d "grant_type=password"
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## 🔐 OAuth2 Flow utilisé
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Le flow utilisé est :
+
+👉 **Resource Owner Password Credentials**
+
+Ce flow permet à l’application d’envoyer directement :
+
+* username
+* password
+
+
+---
+
+## 🧾 Structure d’un JWT
+
+Un JWT est composé de 3 parties :
+
+```
+HEADER.PAYLOAD.SIGNATURE
+```
+
+### 🔹 Header
+
+Contient :
+
+* alg (algorithme)
+* type (JWT)
+
+### 🔹 Payload (affiché dans l’application)
+
+Contient :
+
+* `sub` : identifiant utilisateur
+* `preferred_username` : nom utilisateur
+* `email`
+* `iat` : date d’émission
+* `exp` : date d’expiration
+* `iss` : serveur émetteur
+* `aud` : client
+
+### 🔹 Signature
+
+Permet de vérifier l’intégrité du token (non vérifiée côté frontend).
+
+---
+
+## 🌐 Application React
+
+### 🔑 Page Login
+
+* Formulaire username / password
+* Envoi d’une requête POST vers Keycloak
+* Stockage du token dans `localStorage`
+
+---
+
+### 🔒 Page privée
+
+* Accessible uniquement si token présent
+* Décodage du JWT avec `jwt-decode`
+* Affichage du payload dans un tableau HTML
+
+---
+
+### 🔁 Protection des routes
+
+```js
+<Route
+  path="/private"
+  element={token ? <Private /> : <Navigate to="/" />}
+/>
+```
+
+---
+
+## 📊 Affichage du token
+
+Le payload du JWT est affiché dynamiquement dans un tableau HTML :
+
+* clé
+* valeur
+
+---
+
+## 🔓 Déconnexion
+
+Suppression du token :
+
+```js
+localStorage.removeItem("token");
+```
+
+---
+
+## 🧪 Test avec Postman
+
+Les endpoints OAuth2 peuvent être testés avec Postman :
+
+* URL : `/protocol/openid-connect/token`
+* Méthode : POST
+* Body : x-www-form-urlencoded
+
+---
+
+## 🔍 Décodage du token
+
+Le token peut être analysé sur :
+
+👉 https://www.jwt.io/
+
+---
+
+## 📦 Pipeline CI/CD
+
+Un pipeline GitLab a été mis en place avec :
+
+* installation des dépendances
+* build de l’application React
+
+---
+
+## 📁 Structure du projet
+
+```text
+project/
+├── src/
+│   ├── Login.js
+│   ├── Private.js
+│   └── App.js
+├── public/
+├── package.json
+├── README.md
+```
+
+**TP réalisé dans le cadre du cours Gestion des Identités à l'EFREI Paris.**
+
+_Année 2025-2026_
+ 
