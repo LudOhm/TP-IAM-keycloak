@@ -8,7 +8,7 @@ function Login() {
 
   const handleLogin = async () => {
     const response = await fetch(
-      "http://localhost:8080/realms/tp-iam/protocol/openid-connect/token",
+      "http://localhost:8080/realms/LudivineRealm/protocol/openid-connect/token",
       {
         method: "POST",
         headers: {
