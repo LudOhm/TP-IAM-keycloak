@@ -1,7 +1,9 @@
 # 🔐 TP IAM – Implémentation d’un SSO avec Keycloak et React
 
 **Classe :** M1 CSM
+
 **Date :** 28/04/2026
+
 **Environnement :** MacOS
 
 ---
@@ -237,6 +239,8 @@ project/
 ├── package.json
 ├── README.md
 ```
+
+---
 
 **TP réalisé dans le cadre du cours Gestion des Identités à l'EFREI Paris.**
 
