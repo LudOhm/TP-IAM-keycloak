@@ -25,6 +25,8 @@ function Login() {
 
     const data = await response.json();
 
+    console.log("réponse keycloak: ",data);
+
     if (data.access_token) {
       localStorage.setItem("token", data.access_token);
       navigate("/private");
