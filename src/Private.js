@@ -1,9 +1,9 @@
-import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 function Private() {
   const token = localStorage.getItem("token");
 
-  const decoded = jwt_decode(token);
+  const decoded = jwtDecode(token);
 
   return (
     <div style={{ padding: "20px" }}>
