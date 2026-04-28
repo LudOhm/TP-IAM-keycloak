@@ -218,15 +218,6 @@ Le token peut être analysé sur :
 
 ---
 
-## 📦 Pipeline CI/CD
-
-Un pipeline GitLab a été mis en place avec :
-
-* installation des dépendances
-* build de l’application React
-
----
-
 ## 📁 Structure du projet
 
 ```text
